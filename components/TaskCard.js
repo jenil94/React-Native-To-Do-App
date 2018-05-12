@@ -32,9 +32,9 @@ class TaskCard extends Component {
 			let startTime = new Date(this.props.startTime),
 				endTime = new Date(this.props.endTime);
 			let startHour = startTime.getHours(),
-				startMinute = startTime.getMinutes(),
+				startMinute = startTime.getMinutes().toString().length > 1 ? startTime.getMinutes().toString() : '0'+startTime.getMinutes().toString(),
 				endHour = endTime.getHours(),
-				endMinute = endTime.getMinutes();
+				endMinute = endTime.getMinutes().toString().length > 1 ? endTime.getMinutes().toString() : '0'+endTime.getMinutes().toString();
 			startSuffix = startHour > 12 ? 'PM' : 'AM'
 			startHour = startHour > 12 ? startHour - 12 : startHour;
 			endSuffix = endHour > 12 ? 'PM' : 'AM'
