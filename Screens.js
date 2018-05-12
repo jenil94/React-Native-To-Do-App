@@ -1,10 +1,10 @@
-import { StackNavigator } from 'react-navigation';
+import { StackNavigator, SwitchNavigator } from 'react-navigation';
 import Home from './components/Home.js';
 import AddTask from './components/AddTask.js';
 import Login from './components/Login.js';
 import SignUp from './components/SignUp.js';
 
-const LoginStack = StackNavigator(
+const SignedOut = StackNavigator(
   {
     Login: {
       screen: Login,
@@ -19,19 +19,34 @@ const LoginStack = StackNavigator(
   },
 );
 
-export default StackNavigator(
+const SignedIn =  StackNavigator(
   {
     Home: {
       screen: Home,
     },
     AddTask: {
       screen: AddTask,
-    },
-    Login: {
-      screen: LoginStack,
-    },
+    }
   },
   {
     headerMode: 'none',
   },
 );
+
+const RootNavigator = (signedIn = false) => {
+  return SwitchNavigator (
+    {
+      SignedIn: {
+        screen: SignedIn
+      },
+      SignedOut: {
+        screen: SignedOut
+      }
+    },
+    {
+      initialRouteName: signedIn ? "SignedIn" : "SignedOut"
+    }
+  );
+}
+
+export default RootNavigator;

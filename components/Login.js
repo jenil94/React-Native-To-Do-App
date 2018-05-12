@@ -22,9 +22,6 @@ class Login extends Component {
 		}
 	};
 
-	componentDidMount(){
-	}
-
 	signIn = () => {
 		firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.pass)
 			.then((user) => {

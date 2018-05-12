@@ -27,10 +27,36 @@ class SignUp extends Component {
 			})
 			.catch((error) => {
 				const {code, message} = error;
-				console.log(code, message);
+				let errorMessage;
+				switch(code){
+					case "auth/email-already-in-use":
+						errorMessage = 'This Email is already in use';
+						break;
+
+					case "auth/invalid-email":
+						errorMessage = 'Entered Email is not valid';
+						break;
+
+					case "auth/operation-not-allowed":
+						errorMessage = 'Account creation denied';
+						break;
+
+					case "auth/weak-password":
+						errorMessage = 'Password is not strong enough';
+						break;
+				}
+				this.setState({
+					error: errorMessage
+				});
 			});
 	}
 	render() {
+		const error = this.state.error ? <View style={styles.errorContainer}>
+				<Text style={styles.error}>
+					{this.state.error}
+				</Text>
+			</View>
+			: null;
 		return (
 			<ScrollView style={styles['loginContainer']}>
 			<KeyboardAvoidingView behavior="padding" enabled>
@@ -41,6 +67,7 @@ class SignUp extends Component {
 					<Input value={this.state.name} onChangeText={(name) =>  this.setState({name})} showBottomBorder={true} lable="fullname"/>
 					<Input value={this.state.email} onChangeText={(email) =>  this.setState({email})} showBottomBorder={true} lable="email"/>
 					<Input value={this.state.pass} onChangeText={(pass) =>  this.setState({pass})} showBottomBorder={true} secureTextEntry={true} type="PASSWORD" lable="password"/>
+					{ error }
 					<TouchableOpacity  onPress={this.SignUp} style={styles['button']}>
 						<Text style={styles['buttonText']}>Create</Text>
 					</TouchableOpacity>
@@ -97,6 +124,15 @@ const styles = StyleSheet.create({
 		letterSpacing: 1.33,
 		opacity: 1,
 		color: "#1d1d26"
+	},
+	errorContainer: {
+		justifyContent: 'center',
+		paddingLeft: 20,
+		paddingRight: 20,
+		paddingTop: 10
+	},
+	error: {
+		color: '#F22613'
 	}
 });
 

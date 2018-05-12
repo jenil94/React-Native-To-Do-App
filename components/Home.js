@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import {
-	View,
-	Text,
-	FlatList,
-	StyleSheet,
-	ScrollView,
-	ActivityIndicator,
-	TouchableOpacity
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity
 } from "react-native";
 import Header from "./Header";
 import listData from "../data/taskList.json";
@@ -19,95 +19,80 @@ import { getFireStoreToDORef, setUser } from "../FirebaseUtil";
 import SwipableList from "./SwipableList";
 
 class Home extends Component {
-	state = {
-		loading: true,
-		contentLoaded: false
-	};
+  state = {
+    contentLoaded: false
+  };
 
-	toggleToDo = item => {
-		let itemRef = this.fireRef.doc(item.id);
-		itemRef.update({
-			completed: !item.completed
-		})
-	};
+  toggleToDo = item => {
+    let itemRef = this.fireRef.doc(item.id);
+    itemRef.update({
+      completed: !item.completed
+    });
+  };
 
-	getSecondListItem = () => {
-		if (!this.state.contentLoaded) {
-			return (
-			<View style={styles["contentLoading"]}>
-				<ActivityIndicator size={40} color="#50d2c2" />
-			</View>
-			);
-		}
+  getSecondListItem = () => {
+    if (!this.state.contentLoaded) {
+      return (
+        <View style={styles["contentLoading"]}>
+          <ActivityIndicator size={40} color="#50d2c2" />
+        </View>
+      );
+    }
 
-		if (
-			this.state.toDoData &&
-			Array.isArray(this.state.toDoData) &&
-			this.state.toDoData.length
-		) {
-			return (
-			<SwipableList
-			success={item => this.toggleToDo(item)}
-			data={this.state.toDoData}
-			/>
-		);
-		} else {
-			return (
-			<View style={styles["contentLoading"]}>
-			<Icon name="done-all" size={100} color="#50d2c2" />
-			<Text style={styles["doneText"]}>Yooo! Done for the day</Text>
-			</View>
-			);
-		}
-	};
+    if (
+      this.state.toDoData &&
+      Array.isArray(this.state.toDoData) &&
+      this.state.toDoData.length
+    ) {
+      return (
+        <SwipableList
+          success={item => this.toggleToDo(item)}
+          data={this.state.toDoData}
+        />
+      );
+    } else {
+      return (
+        <View style={styles["contentLoading"]}>
+          <Icon name="done-all" size={100} color="#50d2c2" />
+          <Text style={styles["doneText"]}>Yooo! Done for the day</Text>
+        </View>
+      );
+    }
+  };
 
-	getStatusBlock = () => {
-		return (
-			<View style={styles["statusBlock"]}>
-				<View style={styles["inProgress"]}>
-					<Text>In Progress</Text>
-				</View>
-				<View style={styles["done"]}>
-					<Text>Done</Text>
-				</View>
-			</View>
-		);
-	};
+  getStatusBlock = () => {
+    return (
+      <View style={styles["statusBlock"]}>
+        <View style={styles["inProgress"]}>
+          <Text>In Progress</Text>
+        </View>
+        <View style={styles["done"]}>
+          <Text>Done</Text>
+        </View>
+      </View>
+    );
+  };
 
-	getTitleBlock = () => {
-		return (
-			<View style={styles["container"]}>
-				<View style={styles["statusBar"]} />
-				<View style={styles["textBlock"]}>
-					<Text style={styles["text"]}>{"Tuesday, March 9".toUpperCase()}</Text>
-				</View>
-			</View>
-		);
-	};
+  getTitleBlock = () => {
+    return (
+      <View style={styles["container"]}>
+        <View style={styles["statusBar"]} />
+        <View style={styles["textBlock"]}>
+          <Text style={styles["text"]}>{"Tuesday, March 9".toUpperCase()}</Text>
+        </View>
+      </View>
+    );
+  };
 
   componentDidMount() {
-    this.currentDay = new Date().getTime();
-    this.authSubscription = firebase.auth().onAuthStateChanged(user => {
-      if (!user) {
-        this.props.navigation.navigate("Login");
-	  }
-	  if(user){
-		setUser(user);
-		this.fireRef = getFireStoreToDORef();
+	this.currentDay = new Date().getTime();
+	this.fireRef = getFireStoreToDORef();
 
-		this.dataSubscription = this.fireRef.onSnapshot(() => {
-			this.getStructuredDataFromFireStore(this.currentDay);
-		});
-
+	this.dataSubscription = this.fireRef.onSnapshot(() => {
 		this.getStructuredDataFromFireStore(this.currentDay);
+	});
 
-		this.setState({
-			loading: false,
-			user
-		});
-	  }
-    });
-    this.fireRef = getFireStoreToDORef();
+	this.getStructuredDataFromFireStore(this.currentDay);
   }
 
   getStructuredDataFromFireStore = timestamp => {
@@ -145,13 +130,11 @@ class Home extends Component {
           return Promise.resolve(finalTodo);
           // return(querySnapshot);
         })
-        .catch(function(error) {
-        });
+        .catch(function(error) {});
     }
   };
 
   componentWillUnmount() {
-    this.authSubscription();
     this.dataSubscription();
   }
 
@@ -218,7 +201,7 @@ class Home extends Component {
 
   signOut = () => {
     firebase.auth().signOut();
-  }
+  };
 
   render() {
     const secondListItems = this.getSecondListItem(),
@@ -229,13 +212,12 @@ class Home extends Component {
       this.state && Number.isInteger(this.state.activeIndex)
         ? this.state.activeIndex
         : weekData.activeIndex;
-    return this.state.loading ? (
-      <View style={styles["loadingContainer"]}>
-        <ActivityIndicator size={40} color="#50d2c2" />
-      </View>
-    ) : (
-      <View style={{ backgroundColor: "white", flex: 1 }}>
-        <Header title="Overview" rightIcon='exit-to-app' rightButtonAction={this.signOut}/>
+    return <View style={{ backgroundColor: "white", flex: 1 }}>
+        <Header
+          title="Overview"
+          rightIcon="exit-to-app"
+          rightButtonAction={this.signOut}
+        />
         <TabView
           onTabChange={this.onTabChange}
           navigation={this.props.navigation}
@@ -244,8 +226,7 @@ class Home extends Component {
         />
         <ScrollView style={{ flex: 1 }}>{secondListItems}</ScrollView>
         <FabButton navigation={this.props.navigation} />
-      </View>
-    );
+      </View>;
   }
 }
 
@@ -268,12 +249,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     letterSpacing: 1.7
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white"
   },
   contentLoading: {
     flex: 1,
