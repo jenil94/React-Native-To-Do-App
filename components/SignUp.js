@@ -4,7 +4,8 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	KeyboardAvoidingView,
-	ScrollView
+	ScrollView,
+	ActivityIndicator
 } from 'react-native';
 import Input from './Input';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -14,7 +15,8 @@ class SignUp extends Component {
 	state = {
 		name: '',
 		email: '',
-		pass: ''
+		pass: '',
+		loading: true
 	};
 	navigateToSignIn = () => {
 		if(this.props.navigation){
@@ -69,7 +71,12 @@ class SignUp extends Component {
 					<Input value={this.state.pass} onChangeText={(pass) =>  this.setState({pass})} showBottomBorder={true} secureTextEntry={true} type="PASSWORD" lable="password"/>
 					{ error }
 					<TouchableOpacity  onPress={this.SignUp} style={styles['button']}>
-						<Text style={styles['buttonText']}>Create</Text>
+						{
+							this.state.loading ?
+								<ActivityIndicator size={16} color="#fff" />
+							: <Text style={styles['buttonText']}>Create</Text>
+
+						}
 					</TouchableOpacity>
 				</View>
 				<View style={styles['signUpText']}>
