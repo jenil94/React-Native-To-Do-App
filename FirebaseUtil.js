@@ -4,25 +4,25 @@ let user = null;
 let ref = null;
 
 const setUser = function (userObj) {
-  user = userObj;
-  setToDoRef();
+	user = userObj;
+	setToDoRef();
 };
 
 const getFireStoreToDORef = function () {
-  return ref;
+	return ref;
 };
 
 var setToDoRef = function () {
-  if (user && user.uid) {
-    const string = `todo-${user.uid}-${user.displayName}`;
-    ref = firebase.firestore().collection(string);
-    return;
-  }
-  ref = null;
+	if (user && user.uid) {
+		const string = `todo-${user.uid}-${user.displayName}`;
+		ref = firebase.firestore().collection(string);
+		return;
+	}
+	ref = null;
 };
 
 const getUser = function () {
-  return user;
+	return user;
 };
 
 export { setUser, getUser, getFireStoreToDORef };

@@ -5,12 +5,43 @@ import {
 	FlatList,
 	StyleSheet,
 	ScrollView,
-	TextInput
+	TextInput,
+	ActivityIndicator,
+	TouchableOpacity
 } from 'react-native';
 import Header from './Header';
 import Input from './Input';
 import DateTime from './DateTime';
 import {getFireStoreToDORef} from '../FirebaseUtil';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+class ScreenOverlay extends Component {
+	constructor(){
+		super();
+		this.state = {
+			shown: false,
+			deleteInProgress: false
+		}
+	}
+
+	showScreenOverlay = () => {
+		this.setState({shown: true});
+	}
+
+	hideScreenOverlay = () => {
+		this.setState({shown: false});
+	}
+
+	render(){
+		let screen = <View></View>;
+		if(this.state.shown){
+			screen = <View style={styles['screenOverlay']}>
+				<ActivityIndicator size={40} color="#50d2c2" />
+			</View>;
+		}
+		return screen;
+	}
+}
 
 class AddTask extends Component {
 	constructor(props){
@@ -98,6 +129,7 @@ class AddTask extends Component {
 	}
 	addToDO = () => {
 		let dateStamp = new Date(this.state.date).getTime();
+		this.screenOverlay && this.screenOverlay.showScreenOverlay();
 		this.fireRef.add({
 			title: this.state.title,
 			desc: this.state.desc,
@@ -106,11 +138,13 @@ class AddTask extends Component {
 			endTime: this.state.endTime,
 			location: this.state.location
 		}).then(()=>{
+			this.screenOverlay && this.screenOverlay.hideScreenOverlay();
 			this.props.navigation.navigate('Home');
 		});
 	}
 	updateToDo = () => {
 		let dateStamp = new Date(this.state.date).getTime();
+		this.screenOverlay && this.screenOverlay.showScreenOverlay();
 		if(this.state.id){
 			const docRef = this.fireRef.doc(this.state.id);
 			docRef.update({
@@ -121,11 +155,13 @@ class AddTask extends Component {
 				endTime: this.state.endTime,
 				location: this.state.location
 			}).then(() => {
+				this.screenOverlay && this.screenOverlay.hideScreenOverlay();
 				this.props.navigation.navigate('Home');
 			})
 		}
 	}
 	navigateToEditTask = () => {
+		!this.state.deleteInProgress &&
 		this.props.navigation.navigate('AddTask', {
 			'headerTitle': 'Edit Task',
 			'type': 'EDIT',
@@ -159,14 +195,35 @@ class AddTask extends Component {
 			}
 		}
 	}
+	deleteItem = () => {
+		this.setState({deleteInProgress: true})
+		console.log(this.state);
+		const docRef = this.fireRef.doc(this.state.id);
+			docRef.set(null).then(() => {
+				this.setState({deleteInProgress: false})
+				this.props.navigation.navigate('Home');
+			})
+	}
+	getDeleteButton = () => {
+		return <TouchableOpacity style={styles['deleteContainer']} onPress={this.deleteItem}>
+			{
+				this.state.deleteInProgress ?
+				<ActivityIndicator size={40} color="#fff" />
+				: <Text style={styles['deleteText']}>REMOVE</Text>
+			}
+		</TouchableOpacity>;
+	}
 	render() {
 		const items = this.getItems();
+		const deleteButton = !this.state.editable && this.getDeleteButton() || null;
 		const rightButtonConfig = this.getRightButtonConfig();
 		return <View style={styles['mainContainer']}>
 			<Header title={this.state.headerTitle} rightButtonAction={rightButtonConfig.rightButtonAction} leftIcon="clear" rightIcon={rightButtonConfig.rightIcon} navigation={this.props.navigation}/>
 			<ScrollView style={styles['mainContainer']}>
 				{items}
+				{deleteButton}
 			</ScrollView>
+			<ScreenOverlay ref={screenOverlay => {this.screenOverlay = screenOverlay}}/>
 		</View>;
 	}
 }
@@ -184,6 +241,29 @@ const styles = StyleSheet.create({
 	},
 	secondaryContainer: {
 		backgroundColor: '#f8f8f9'
+	},
+	screenOverlay: {
+		flex: 1,
+		height: '100%',
+		width: '100%',
+		alignItems: "center",
+		justifyContent: "center",
+		backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		position: 'absolute'
+	},
+	deleteContainer:{
+		margin: 20,
+		marginTop: 40,
+		height: 50,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: '#50d2c2'
+	},
+	deleteText:{
+		color: 'white',
+		marginLeft: 10,
+		fontSize: 16
 	}
 });
 

@@ -5,34 +5,100 @@
  */
 
 import React, { Component } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import {
+	Platform,
+	StyleSheet,
+	Text,
+	View,
+	ActivityIndicator
+} from "react-native";
 import Home from "./components/Home";
-import Screens from "./Screens";
+import RootNavigator from "./Screens";
 import firebase from "react-native-firebase";
 import { setUser, getUser } from "./FirebaseUtil";
 
-const instructions = Platform.select({
-  ios: "Press Cmd+R to reload,\n" + "Cmd+D or shake for dev menu",
-  android:
-    "Double tap R on your keyboard to reload,\n" +
-    "Shake or press menu button for dev menu"
-});
+class ScreenOverlay extends Component {
+	constructor(){
+		super();
+		this.state = {
+			shown: false
+		}
+	}
 
-type Props = {};
-export default class App extends Component<Props> {
-  componentDidMount() {
-    this.authSubscription = firebase.auth().onAuthStateChanged(user => {
-      setUser(user);
-    });
-  }
+	showScreenOverlay = () => {
+		this.setState({shown: true});
+	}
 
-  componentWillUnmount() {
-    this.authSubscription();
-  }
+	hideScreenOverlay = () => {
+		this.setState({shown: false});
+	}
 
-  render() {
-    return <Screens />;
-  }
+	render(){
+		let screen = <View></View>;
+		if(this.state.shown){
+			screen = <View style={styles['screenOverlay']}>
+				<ActivityIndicator size={40} color="#50d2c2" />
+			</View>;
+		}
+		return screen;
+	}
 }
 
-const styles = StyleSheet.create({});
+export default class App extends Component {
+	constructor() {
+		super();
+		this.state = {
+			loading: true,
+			isLoggedIn: false
+		};
+	}
+
+	componentDidMount() {
+		this.authSubscription = firebase.auth().onAuthStateChanged(user => {
+			setUser(user);
+			this.setState({
+				loading: false,
+				isLoggedIn: user ? true : false
+			});
+		});
+	}
+
+	componentWillUnmount() {
+		this.authSubscription();
+	}
+
+	render() {
+		if (this.state.loading) {
+			return (
+				<View style={styles["loadingContainer"]}>
+					<ActivityIndicator size={40} color="#50d2c2" />
+				</View>
+			);
+		}
+		const Layout = RootNavigator(this.state.isLoggedIn);
+		return <View style={styles['container']}>
+			<Layout />
+		</View>;
+	}
+}
+
+const styles = StyleSheet.create({
+	loadingContainer: {
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+		backgroundColor: "white"
+	},
+	container: {
+		flex: 1
+	},
+	screenOverlay: {
+		flex: 1,
+		height: '100%',
+		width: '100%',
+		alignItems: "center",
+		justifyContent: "center",
+		backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		position: 'absolute'
+	}
+});

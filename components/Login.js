@@ -4,7 +4,8 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 	KeyboardAvoidingView,
-	ScrollView
+	ScrollView,
+	ActivityIndicator
 } from 'react-native';
 import Input from './Input';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -13,7 +14,8 @@ import firebase from 'react-native-firebase';
 class Login extends Component {
 	state = {
 		email: '',
-		pass: ''
+		pass: '',
+		loading: false
 	};
 
 	navigateToSignUp = () => {
@@ -22,11 +24,10 @@ class Login extends Component {
 		}
 	};
 
-	componentDidMount(){
-	}
-
 	signIn = () => {
-		firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.pass)
+		if(this.state.email.length && this.state.pass.length){
+			this.setState({loading: true})
+			firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.pass)
 			.then((user) => {
 				this.props.navigation.navigate('Home');
 			})
@@ -51,13 +52,20 @@ class Login extends Component {
 						break;
 				}
 				this.setState({
-					error: errorMessage
+					error: errorMessage,
+					loading: false
 				});
 			});
+		}
+		else{
+			this.setState({
+				error: "Enter a valid email and password"
+			})
+		}
 	}
 
 	render() {
-		const error = this.state.error ? <View style={styles.errorContainer}>
+		const error = this.state.error && this.state.error.length ? <View style={styles.errorContainer}>
 				<Text style={styles.error}>
 					{this.state.error}
 				</Text>
@@ -70,11 +78,15 @@ class Login extends Component {
 					<Icon name="user" size={120} color="#50d2c2" />
 				</View>
 				<View>
-					<Input value={this.state.email} onChangeText={(email) =>  this.setState({email})} showBottomBorder={true} lable="email"/>
-					<Input value={this.state.pass} onChangeText={(pass) =>  this.setState({pass})} showBottomBorder={true} secureTextEntry={true} type="PASSWORD" lable="password"/>
+					<Input value={this.state.email} onChangeText={(email) =>  this.setState({email, error:''})} showBottomBorder={true} lable="email"/>
+					<Input value={this.state.pass} onChangeText={(pass) =>  this.setState({pass, error:''})} showBottomBorder={true} secureTextEntry={true} type="PASSWORD" lable="password"/>
 					{ error }
 					<TouchableOpacity onPress={this.signIn} style={styles['button']}>
-						<Text style={styles['buttonText']}>Sign In</Text>
+					{
+						this.state.loading ?
+							<ActivityIndicator size={32} color="#fff" />
+						: <Text style={styles['buttonText']}>Sign In</Text>
+					}
 					</TouchableOpacity>
 				</View>
 				<View style={styles['signUpText']}>
