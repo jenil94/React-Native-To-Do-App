@@ -9,7 +9,7 @@
   "dependencies": {
     "react": "16.3.1",
     "react-native": "0.55.3",
-    "react-native-firebase": "^4.0.6",
+    "react-native-firebase": "^5.6.0",
     "react-native-fontawesome": "^5.7.0",
     "react-native-modal-datetime-picker": "^5.1.0",
     "react-native-vector-icons": "^4.6.0",
